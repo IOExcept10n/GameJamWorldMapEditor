@@ -86,10 +86,10 @@ namespace MapEditor
             {
                 suppressEditEvent = true;
                 WorldEditor.SelectedTile = tile;
-                TileType.SelectedIndex = tile.Type;
                 TileType.IsEnabled = true;
-                TileEffect.SelectedIndex = tile.Effect;
+                TileType.SelectedIndex = WorldEditor.TypeIndexTransformationDictionary?[tile.Type] ?? -1;
                 TileEffect.IsEnabled = true;
+                TileEffect.SelectedIndex = WorldEditor.EffectTypeIndexTransformationDictionary?[tile.Effect] ?? -1;
                 TilePositionX.Text = tile.X.ToString();
                 TilePositionZ.Text = tile.Z.ToString();
                 TileEditor.DataContext = WorldEditor.Map.Tiles[tile.X, tile.Z];
@@ -114,6 +114,7 @@ namespace MapEditor
         {
             if (WorldEditor.TileTypes != null)
             {
+                
                 TileType.ItemsSource = WorldEditor.TileTypes.Select(x => x.Value.Name);
             }
             if (WorldEditor.TileEffectTypes != null)
@@ -267,6 +268,11 @@ namespace MapEditor
         private void SaveWorldAs_Click(object sender, RoutedEventArgs e)
         {
             WorldEditor.SaveAs();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!WorldEditor.SaveIfUnsaved()) e.Cancel = true;
         }
     }
 }

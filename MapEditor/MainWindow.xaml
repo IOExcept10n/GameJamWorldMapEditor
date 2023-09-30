@@ -4,12 +4,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="119*" />
+            <ColumnDefinition Width="412*"/>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="266*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
@@ -17,7 +18,7 @@
             <RowDefinition Height="25" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <DockPanel Grid.ColumnSpan="3">
+        <DockPanel Grid.ColumnSpan="4">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Header="_Create" Name="CreateWorld" Click="CreateWorld_Click" />
@@ -31,11 +32,11 @@
                 </MenuItem>
             </Menu>
         </DockPanel>
-        <GridSplitter Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" />
-        <ScrollViewer x:Name="TilemapHolder" Grid.Row="1" Grid.RowSpan="3" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
+        <GridSplitter Grid.Column="2" Grid.Row="1" Grid.RowSpan="3" HorizontalAlignment="Center" Width="3" />
+        <ScrollViewer x:Name="TilemapHolder" Grid.Row="1" Grid.RowSpan="3" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Grid.ColumnSpan="2">
             <Grid x:Name="Tilemap" />
         </ScrollViewer>
-        <Grid Grid.Column="2" Grid.Row="1">
+        <Grid Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Margin="3,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="2" />
@@ -46,7 +47,7 @@
             <TextBlock Text="Z Size:" VerticalAlignment="Center" Grid.Column="2" />
             <TextBox x:Name="WorldSizeZEditor" Margin="45 0 1 0" Grid.Column="2" VerticalAlignment="Center" LostFocus="WorldSizeZEditor_LostFocus" KeyDown="WorldSizeZEditor_KeyDown" />
         </Grid>
-        <Grid Grid.Column="2" Grid.Row="2">
+        <Grid Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2" Margin="3,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="91*" />
                 <ColumnDefinition Width="0*" />
@@ -59,7 +60,7 @@
             <TextBlock Text="Tile Z:" VerticalAlignment="Center" Grid.Column="4" />
             <TextBox x:Name="TilePositionZ" Margin="45,0,1,0" Grid.Column="4" VerticalAlignment="Center" LostFocus="TilePositionZ_LostFocus" KeyDown="TilePositionZ_KeyDown" />
         </Grid>
-        <ScrollViewer x:Name="TileEditor" Grid.Column="2" Grid.Row="3">
+        <ScrollViewer x:Name="TileEditor" Grid.Column="2" Grid.Row="3" Grid.ColumnSpan="2" Margin="3,0,0,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

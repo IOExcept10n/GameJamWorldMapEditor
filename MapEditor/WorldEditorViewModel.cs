@@ -55,12 +55,22 @@ namespace MapEditor
                 tileTypes = value;
                 if (value != null)
                 {
+                    if (!value.ContainsKey(0))
+                    {
+                        value.Add(0, new() { Name = "None", Color = Colors.Black });
+                    }
                     Dictionary<string, byte> reverse = new();
                     foreach (var pair in value)
                     {
                         reverse.Add(pair.Value.Name, pair.Key);
                     }
                     ReverseTileTypes = reverse;
+                    TypeIndexTransformationDictionary = new();
+                    int i = 0;
+                    foreach (var pair in value)
+                    {
+                        TypeIndexTransformationDictionary.Add(pair.Key, i++);
+                    }
                 }
             }
         }
@@ -76,12 +86,22 @@ namespace MapEditor
                 tileEffectTypes = value;
                 if (value != null)
                 {
+                    if (!value.ContainsKey(0))
+                    {
+                        value.Add(0, new() { Name = "None", Color = Colors.Black });
+                    }
                     Dictionary<string, byte> reverse = new();
                     foreach (var pair in value)
                     {
                         reverse.Add(pair.Value.Name, pair.Key);
                     }
                     ReverseTileEffectTypes = reverse;
+                    EffectTypeIndexTransformationDictionary = new();
+                    int i = 0;
+                    foreach (var pair in value)
+                    {
+                        EffectTypeIndexTransformationDictionary.Add(pair.Key, i++);
+                    }
                 }
             }
         }
@@ -89,12 +109,16 @@ namespace MapEditor
         /// <summary>
         /// Gets the set of names mapped with indices. Used to detect an index from the tile type name.
         /// </summary>
-        public Dictionary<string, byte>? ReverseTileTypes { get; private set; }
+        internal Dictionary<string, byte>? ReverseTileTypes { get; private set; }
 
         /// <summary>
         /// Gets the set of names mapped with indices. Used to detect an index from the tile type name.
         /// </summary>
-        public Dictionary<string, byte>? ReverseTileEffectTypes { get; private set; }
+        internal Dictionary<string, byte>? ReverseTileEffectTypes { get; private set; }
+
+        internal Dictionary<byte, int>? TypeIndexTransformationDictionary { get; private set; }
+
+        internal Dictionary<byte, int>? EffectTypeIndexTransformationDictionary { get; private set; }
 
         /// <summary>
         /// Gets the world map instance that is currently handled.
@@ -167,7 +191,7 @@ namespace MapEditor
             }
             TileTypes = types;
             if (!File.Exists(tileEffectTypesPath)) types = null;
-            else types = JsonConvert.DeserializeObject<Dictionary<byte, TileTypeDefinition>>(File.ReadAllText(tileTypesPath));
+            else types = JsonConvert.DeserializeObject<Dictionary<byte, TileTypeDefinition>>(File.ReadAllText(tileEffectTypesPath));
             if (types == null)
             {
                 var result = MessageBox.Show("Can't find the file with the tile effect types definitions. Would you like to select the new file?", "Can't find file", MessageBoxButton.YesNo);
@@ -176,7 +200,10 @@ namespace MapEditor
                     ReselectTileEffectTypesFile();
                 }
             }
-            TileEffectTypes = types;
+            else
+            {
+                TileEffectTypes = types;
+            }
             Map = WorldMap.CreateNew(5, 5);
         }
 
