@@ -98,14 +98,28 @@ namespace MapEditor
             tile.RelatedButton = tileButton;
         }
 
+        private void SetSelection(int x, int z)
+        {
+            if (x >= WorldEditor.Map.WorldSizeX || z >= WorldEditor.Map.WorldSizeZ ||
+                x < 0 || z < 0) return;
+            var tile = WorldEditor.SelectedTile = WorldEditor.Map.Tiles[x, z];
+            tile.RelatedButton?.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            UpdateButtonSelection(tile);
+        }
+
         private void TileEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UpdateButtonSelection(e.NewValue);
+        }
+
+        private void UpdateButtonSelection(object? e)
         {
             int index = 0;
             foreach (Button btn in Tilemap.Children)
             {
                 int x = index / WorldEditor.Map.WorldSizeZ;
                 int z = index % WorldEditor.Map.WorldSizeZ;
-                btn.IsEnabled = WorldEditor.Map.Tiles[x, z] != e.NewValue;
+                btn.IsEnabled = WorldEditor.Map.Tiles[x, z] != e;
                 index++;
             }
         }
@@ -129,6 +143,7 @@ namespace MapEditor
             {
                 byte type = WorldEditor.ReverseTileTypes[value];
                 TileInfo tile = (TileInfo)TileType.DataContext;
+                WorldEditor.LastType = type;
                 tile.Type = type;
                 LayoutButton(tile.RelatedButton!, tile);
                 WorldEditor.HasUnsavedChanges = true;
@@ -141,6 +156,7 @@ namespace MapEditor
             {
                 byte effect = WorldEditor.ReverseTileEffectTypes[value];
                 TileInfo tile = (TileInfo)TileType.DataContext;
+                WorldEditor.LastEffect = effect;
                 tile.Effect = effect;
                 LayoutButton(tile.RelatedButton!, tile);
                 WorldEditor.HasUnsavedChanges = true;
@@ -273,6 +289,62 @@ namespace MapEditor
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (!WorldEditor.SaveIfUnsaved()) e.Cancel = true;
+        }
+
+        private void UnsetSelection()
+        {
+            WorldEditor.SelectedTile = null;
+            UpdateButtonSelection(null);
+            suppressEditEvent = true;
+            TileType.IsEnabled = false;
+            TileType.SelectedIndex = -1;
+            TileEffect.IsEnabled = false;
+            TileEffect.SelectedIndex = -1;
+            suppressEditEvent = false;
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (WorldEditor.SelectedTile == null)
+            {
+                SetSelection(0, 0);
+                return;
+            }
+            switch (e.Key)
+            {
+                case Key.Q:
+                case Key.Escape:
+                    UnsetSelection();
+                    break;
+                case Key.D:
+                case Key.Right:
+                    SetSelection(WorldEditor.SelectedTile.X + 1, WorldEditor.SelectedTile.Z);
+                    break;
+                case Key.A:
+                case Key.Left:
+                    SetSelection(WorldEditor.SelectedTile.X - 1, WorldEditor.SelectedTile.Z);
+                    break;
+                case Key.W:
+                case Key.Up:
+                    SetSelection(WorldEditor.SelectedTile.X, WorldEditor.SelectedTile.Z - 1);
+                    break;
+                case Key.S:
+                case Key.Down:
+                    SetSelection(WorldEditor.SelectedTile.X, WorldEditor.SelectedTile.Z + 1);
+                    break;
+                case Key.G:
+                    if (WorldEditor.ReapplyTypeAction())
+                    {
+                        ResetMap();
+                    }
+                    break;
+                case Key.F:
+                    if (WorldEditor.ReapplyEffectAction())
+                    {
+                        ResetMap();
+                    }
+                    break;
+            }
         }
     }
 }

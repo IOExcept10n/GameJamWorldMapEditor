@@ -5,6 +5,9 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <Title>Gamejam WorldMap Editor</Title>
+    <Version>1.0.2</Version>
+    <Authors>IOExcept10n</Authors>
   </PropertyGroup>
 
   <ItemGroup>

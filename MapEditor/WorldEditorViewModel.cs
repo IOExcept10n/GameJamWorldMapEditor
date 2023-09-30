@@ -143,6 +143,10 @@ namespace MapEditor
         /// </summary>
         public TileInfo? SelectedTile { get; set; }
 
+        public byte? LastType { get; set; }
+
+        public byte? LastEffect { get; set; }
+
         /// <summary>
         /// Gets the value that determines whether the edited world has unsaved changed.
         /// </summary>
@@ -339,6 +343,26 @@ namespace MapEditor
                 Map = WorldMap.LoadFile(dialog.FileName);
                 HasUnsavedChanges = false;
                 FilePath = dialog.FileName;
+                return true;
+            }
+            return false;
+        }
+
+        public bool ReapplyTypeAction()
+        {
+            if (SelectedTile != null && LastType != null)
+            {
+                SelectedTile.Type = LastType.Value;
+                return true;
+            }
+            return false;
+        }
+
+        public bool ReapplyEffectAction()
+        {
+            if (SelectedTile != null && LastEffect != null)
+            {
+                SelectedTile.Effect = LastEffect.Value;
                 return true;
             }
             return false;
