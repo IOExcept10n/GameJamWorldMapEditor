@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MapEditor.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="TileTypesFilePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">TileTypes.json</Value>
+    </Setting>
+    <Setting Name="TileEffectTypesFilePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">TileEffectTypes.json</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
