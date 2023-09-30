@@ -1,31 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace MapEditor
 {
+    /// <summary>
+    /// Represents a loadable world map object.
+    /// </summary>
     public class WorldMap
     {
         private TileInfo[,] tiles;
         private int worldSizeX;
         private int worldSizeZ;
 
+        /// <summary>
+        /// Gets the array of tiles stored in a map.
+        /// </summary>
         public TileInfo[,] Tiles => tiles;
 
+        /// <summary>
+        /// Gets the X-part of the world size.
+        /// </summary>
         public int WorldSizeX => worldSizeX;
 
+        /// <summary>
+        /// Gets the Y-part of the world size.
+        /// </summary>
         public int WorldSizeZ => worldSizeZ;
 
-        public WorldMap(TileInfo[,] map)
+        /// <summary>
+        /// Creates a new instance of the <see cref="WorldMap"/> class.
+        /// </summary>
+        /// <param name="map">Tiles to store.</param>
+        protected WorldMap(TileInfo[,] map)
         {
             tiles = map;
             worldSizeX = map.GetLength(0);
             worldSizeZ = map.GetLength(1);
         }
 
+        /// <summary>
+        /// Resizes a map with the new size.
+        /// </summary>
+        /// <param name="newX">New X size of the map.</param>
+        /// <param name="newZ">New Z size of the map.</param>
         public void Resize(int newX, int newZ)
         {
             TileInfo[,] newTiles = new TileInfo[newX, newZ];
@@ -48,6 +64,11 @@ namespace MapEditor
             worldSizeZ = newZ;
         }
 
+        /// <summary>
+        /// Loads a file with the world map.
+        /// </summary>
+        /// <param name="path">A file path to load the map from.</param>
+        /// <returns>The instance of the <see cref="WorldMap"/> that is stored in a file.</returns>
         public static WorldMap LoadFile(string path)
         {
             using Stream stream = File.OpenRead(path);
@@ -68,6 +89,12 @@ namespace MapEditor
             return new(tiles);
         }
 
+        /// <summary>
+        /// Creates a new world map with the following width and height.
+        /// </summary>
+        /// <param name="width">The <see cref="WorldSizeX"/> component.</param>
+        /// <param name="height">The <see cref="WorldSizeZ"/> component.</param>
+        /// <returns>The new instance of the <see cref="WorldMap"/> with the default tiles set.</returns>
         public static WorldMap CreateNew(byte width, byte height)
         {
             TileInfo[,] map = new TileInfo[width, height];
@@ -81,6 +108,10 @@ namespace MapEditor
             return new(map);
         }
 
+        /// <summary>
+        /// Saves the map into a file with the given path.
+        /// </summary>
+        /// <param name="path">A path to save a file into.</param>
         public void SaveWorld(string path)
         {
             string? dirPath = Path.GetDirectoryName(path);
@@ -90,7 +121,7 @@ namespace MapEditor
             using BinaryWriter writer = new(stream);
             writer.Write((byte)worldSizeX);
             writer.Write((byte)worldSizeZ);
-            for (int i = 0; i <  worldSizeX; i++)
+            for (int i = 0; i < worldSizeX; i++)
             {
                 for (int j = 0; j < worldSizeZ; j++)
                 {

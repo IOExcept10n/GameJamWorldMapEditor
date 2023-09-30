@@ -1,18 +1,11 @@
 ﻿using MapEditor.Properties;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace MapEditor
@@ -30,6 +23,7 @@ namespace MapEditor
         {
             InitializeComponent();
             DataContext = WorldEditor = new WorldEditorViewModel(Settings.Default.TileTypesFilePath, Settings.Default.TileEffectTypesFilePath);
+            WorldEditor.TileTypesLoaded += TileTypesUpdated;
             TileTypesUpdated();
             TileEditor.DataContextChanged += TileEditor_DataContextChanged;
             WorldEditor.WorldTitleChanged += (_, __) => Title = WorldEditor.WorldTitle;
@@ -93,9 +87,9 @@ namespace MapEditor
                 suppressEditEvent = true;
                 WorldEditor.SelectedTile = tile;
                 TileType.SelectedIndex = tile.Type;
-                TileEffect.IsEnabled = true;
-                TileEffect.SelectedIndex = tile.Effect;
                 TileType.IsEnabled = true;
+                TileEffect.SelectedIndex = tile.Effect;
+                TileEffect.IsEnabled = true;
                 TilePositionX.Text = tile.X.ToString();
                 TilePositionZ.Text = tile.Z.ToString();
                 TileEditor.DataContext = WorldEditor.Map.Tiles[tile.X, tile.Z];
@@ -213,6 +207,7 @@ namespace MapEditor
                 ReselectPosition();
             }
         }
+
         private void TilePositionZ_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
