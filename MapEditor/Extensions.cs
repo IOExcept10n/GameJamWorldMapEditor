@@ -18,33 +18,29 @@ namespace MapEditor
                 version.Revision;
         }
 
-        public static Color GetContrast(this Color background, Color foreground = default)
+        public static Color GetContrast(this Color background, int grayscaleThreshold = 30)
         {
-            if (foreground == default)
-                foreground = Colors.White;
-            double backgroundLuminance = background.R * 0.2126 + background.G * 0.7152 + background.B * 0.0722;
-            double foregroundLuminance = foreground.R * 0.2126 + foreground.G * 0.7152 + foreground.B * 0.0722;
+            int delta = background.GetRgbDelta();
+            if (delta <= grayscaleThreshold) return Colors.Red;
+            return Color.FromArgb(255, (byte)(255 - background.R), (byte)(255 - background.G), (byte)(255 - background.B));
+        }
 
-            double contrastRatio = (foregroundLuminance + 0.05) / (backgroundLuminance + 0.05);
-
-            if (contrastRatio >= 4.5)
-            {
-                // The contrast ratio meets the AA level requirement
-                // No need to change the foreground color
-            }
-            else if (contrastRatio >= 3.0)
-            {
-                // The contrast ratio meets the AA level requirement for large text
-                // Change the foreground color to a darker shade
-                foreground = Color.FromArgb(255, (byte)(foreground.R - 50), (byte)(foreground.G - 50), (byte)(foreground.B - 50));
-            }
-            else
-            {
-                // The contrast ratio does not meet the AA level requirement
-                // Change the foreground color to a much darker shade
-                foreground = Color.FromArgb(255, (byte)(foreground.R - 100), (byte)(foreground.G - 100), (byte)(foreground.B - 100));
-            }
-            return foreground;
+        /// <summary>
+        /// Utility method that encapsulates the RGB Delta calculation:
+        /// delta = abs(R-G) + abs(G-B) + abs(B-R) 
+        /// So, between the color RGB(50,100,50) and RGB(128,128,128)
+        /// The first would be the higher delta with a value of 100 as compared
+        /// to the second color which, being grayscale, would have a delta of 0
+        /// </summary>
+        /// <param name="color">The color for which to calculate the delta</param>
+        /// <returns>An integer in the range 0 to 510 indicating the difference
+        /// in the RGB values that comprise the color</returns>
+        private static int GetRgbDelta(this Color color)
+        {
+            return
+                Math.Abs(color.R - color.G) +
+                Math.Abs(color.G - color.B) +
+                Math.Abs(color.B - color.R);
         }
     }
 }
