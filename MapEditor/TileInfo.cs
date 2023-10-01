@@ -1,9 +1,19 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace MapEditor
 {
+    [Flags]
+    public enum TileFlags : byte
+    {
+        None,
+        RotatedBy90 = 1,
+        RotatedBy180 = 2,
+        RotatedBy270 = 3
+    }
+
     /// <summary>
     /// Represents a class for the objects that holds the information about a world tile.
     /// </summary>
@@ -18,6 +28,8 @@ namespace MapEditor
         /// The effect stored in a tile. If set <see langword="0"/>, there are no effects assigned to it.
         /// </summary>
         public byte Effect { get; set; }
+
+        public TileFlags Flags { get; set; }
 
         /// <summary>
         /// Gets the position of a tile.

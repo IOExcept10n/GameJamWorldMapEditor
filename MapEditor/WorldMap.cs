@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Reflection;
+using System.Windows;
 
 namespace MapEditor
 {
@@ -7,6 +9,8 @@ namespace MapEditor
     /// </summary>
     public class WorldMap
     {
+        public static readonly int Version = Assembly.GetCallingAssembly().GetName().Version!.ToInt();
+
         private TileInfo[,] tiles;
         private int worldSizeX;
         private int worldSizeZ;
@@ -75,6 +79,11 @@ namespace MapEditor
             using BinaryReader reader = new(stream);
             int width = reader.ReadByte();
             int height = reader.ReadByte();
+            int version = reader.ReadInt32();
+            if (version > Version)
+            {
+                throw new InvalidDataException("The version of the file is greater than the application version.");
+            }
             TileInfo[,] tiles = new TileInfo[width, height];
             for (int i = 0; i < width; i++)
             {
@@ -82,7 +91,15 @@ namespace MapEditor
                 {
                     byte type = reader.ReadByte();
                     byte effect = reader.ReadByte();
-                    TileInfo info = new() { Effect = effect, Type = type, X = i, Z = j };
+                    byte flags = reader.ReadByte();
+                    TileInfo info = new() 
+                    { 
+                        Effect = effect, 
+                        Type = type, 
+                        X = i, 
+                        Z = j, 
+                        Flags = (TileFlags)flags
+                    };
                     tiles[i, j] = info;
                 }
             }
@@ -121,6 +138,7 @@ namespace MapEditor
             using BinaryWriter writer = new(stream);
             writer.Write((byte)worldSizeX);
             writer.Write((byte)worldSizeZ);
+            writer.Write(Version);
             for (int i = 0; i < worldSizeX; i++)
             {
                 for (int j = 0; j < worldSizeZ; j++)
@@ -128,6 +146,7 @@ namespace MapEditor
                     var tile = tiles[i, j];
                     writer.Write(tile.Type);
                     writer.Write(tile.Effect);
+                    writer.Write((byte)tile.Flags);
                 }
             }
         }

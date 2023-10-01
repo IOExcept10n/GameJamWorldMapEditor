@@ -17,11 +17,18 @@ namespace MapEditor
     {
         private bool suppressEditEvent;
 
+        public static RoutedCommand SaveCommand = new();
+        public static RoutedCommand OpenCommand = new();
+        public static RoutedCommand UnselectCommand = new();
+
         public WorldEditorViewModel WorldEditor { get; }
 
         public MainWindow()
         {
             InitializeComponent();
+            SaveCommand.InputGestures.Add(new KeyGesture(Key.S, ModifierKeys.Control));
+            OpenCommand.InputGestures.Add(new KeyGesture(Key.O, ModifierKeys.Control));
+            UnselectCommand.InputGestures.Add(new MouseGesture(MouseAction.LeftClick, ModifierKeys.Control));
             DataContext = WorldEditor = new WorldEditorViewModel(Settings.Default.TileTypesFilePath, Settings.Default.TileEffectTypesFilePath);
             WorldEditor.TileTypesLoaded += TileTypesUpdated;
             TileTypesUpdated();
@@ -70,22 +77,39 @@ namespace MapEditor
         private void LayoutButton(Button tileButton, TileInfo tile)
         {
             tileButton.Margin = new Thickness(2);
-            tileButton.Background = new SolidColorBrush(tile.GetTypeColor(WorldEditor));
+            var color = tile.GetTypeColor(WorldEditor);
+            tileButton.Background = new SolidColorBrush(color);
+            Panel contentPresenter = new Grid();
+            int rotation = ComputeRotation(tile);
+            var rotateTransform = new RotateTransform(rotation, 38, 38);
+            tileButton.RenderTransform = rotateTransform;
+            var labelColor = color.GetContrast();
+            contentPresenter.Children.Add(
+                new Rectangle()
+                {
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Width = 6,
+                    Height = 30,
+                    Fill = new SolidColorBrush(labelColor),
+                    Margin = new Thickness(0, 0, 0, 40)
+                });
             if (tile.Effect != 0)
             {
-                tileButton.Content = new Rectangle()
+                contentPresenter.Children.Add(new Rectangle()
                 {
-                    Width = 20,
-                    Height = 20,
+                    Width = 30,
+                    Height = 30,
                     Fill = new SolidColorBrush(tile.GetEffectTypeColor(WorldEditor))
-                };
+                });
             }
+            tileButton.Content = contentPresenter;
             tileButton.SetValue(Grid.ColumnProperty, tile.X);
             tileButton.SetValue(Grid.RowProperty, tile.Z);
             tileButton.Click += (s, e) =>
             {
                 suppressEditEvent = true;
                 WorldEditor.SelectedTile = tile;
+                TileRotation.IsEnabled = true;
                 TileType.IsEnabled = true;
                 TileType.SelectedIndex = WorldEditor.TypeIndexTransformationDictionary?[tile.Type] ?? -1;
                 TileEffect.IsEnabled = true;
@@ -96,6 +120,24 @@ namespace MapEditor
                 suppressEditEvent = false;
             };
             tile.RelatedButton = tileButton;
+        }
+
+        private static int ComputeRotation(TileInfo tile)
+        {
+            int rotation = 0;
+            if ((tile.Flags & TileFlags.RotatedBy90) != 0)
+                rotation += 90;
+            if ((tile.Flags & TileFlags.RotatedBy180) != 0)
+                rotation += 180;
+            return rotation;
+        }
+
+        private static TileFlags DecomposeRotation(int rotation)
+        {
+            if (rotation == 270) return TileFlags.RotatedBy270;
+            if (rotation == 180) return TileFlags.RotatedBy180;
+            if (rotation == 90) return TileFlags.RotatedBy90;
+            return TileFlags.None;
         }
 
         private void SetSelection(int x, int z)
@@ -300,6 +342,7 @@ namespace MapEditor
             TileType.SelectedIndex = -1;
             TileEffect.IsEnabled = false;
             TileEffect.SelectedIndex = -1;
+            TileRotation.IsEnabled = false;
             suppressEditEvent = false;
         }
 
@@ -344,7 +387,44 @@ namespace MapEditor
                         ResetMap();
                     }
                     break;
+                case Key.R:
+                    RotateTile();
+                    break;
             }
+        }
+
+        private void TileRotation_Click(object sender, RoutedEventArgs e)
+        {
+            RotateTile();
+        }
+
+        private void RotateTile()
+        {
+            if (WorldEditor.SelectedTile == null) return;
+            int rotation = ComputeRotation(WorldEditor.SelectedTile);
+            rotation += 90;
+            rotation %= 360;
+            WorldEditor.SelectedTile.Flags = DecomposeRotation(rotation);
+            LayoutButton(WorldEditor.SelectedTile.RelatedButton!, WorldEditor.SelectedTile);
+            WorldEditor.HasUnsavedChanges = true;
+        }
+
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            WorldEditor.Save();
+        }
+
+        private void CommandBinding_Executed_1(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (WorldEditor.OpenWorld())
+            {
+                ResetMap();
+            }
+        }
+
+        private void CommandBinding_Executed_2(object sender, ExecutedRoutedEventArgs e)
+        {
+            UnsetSelection();
         }
     }
 }
